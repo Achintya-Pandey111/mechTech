@@ -92,3 +92,13 @@ model UserSkill {
   skillId     String     @db.Uuid
   proficiency SkillLevel @default(BEGINNER)
 }
+
+model Mentorship {
+  id        String           @id @default(uuid()) @db.Uuid
+  studentId String           @db.Uuid
+  alumniId  String           @db.Uuid
+  status    MentorshipStatus @default(PENDING)
+  message   String?          @db.Text
+  createdAt DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime         @updatedAt @db.Timestamptz(6)
+}
