@@ -19,3 +19,9 @@ model College {
   updatedAt DateTime     @updatedAt @db.Timestamptz(6)
 }
 
+model Department {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  collegeId String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+}
