@@ -46,3 +46,14 @@ model Student {
   createdAt      DateTime @default(now()) @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @db.Timestamptz(6)
 }
+
+model Alumni {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @unique @db.Uuid
+  departmentId   String   @db.Uuid
+  graduationYear Int
+  currentCompany String?  @db.VarChar(255)
+  jobTitle       String?  @db.VarChar(255)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(6)
+}
