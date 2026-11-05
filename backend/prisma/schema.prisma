@@ -75,3 +75,9 @@ model Comment {
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 }
+
+model PostLike {
+  userId    String   @db.Uuid
+  postId    String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+}
