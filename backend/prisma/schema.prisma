@@ -10,3 +10,12 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model College {
+  id        String       @id @default(uuid()) @db.Uuid
+  name      String       @unique @db.VarChar(255)
+  website   String?      @db.VarChar(500)
+  createdAt DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime     @updatedAt @db.Timestamptz(6)
+}
+
