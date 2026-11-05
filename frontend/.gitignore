@@ -1,0 +1,16 @@
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+dist-electron/
+**/dist/
+
+# Environment variables
+.env
+.env.*
+
+# macOS
+.DS_Store
