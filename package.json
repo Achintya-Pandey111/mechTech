@@ -1,0 +1,14 @@
+{
+  "name": "alumniconnect",
+  "version": "1.0.0",
+  "description": "AlumniConnect - Student & Alumni Technical Network",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend/renderer run dev",
+    "dev:electron": "npm --prefix frontend run start",
+    "build:frontend": "npm --prefix frontend/renderer run build",
+    "prisma:generate": "npm --prefix backend run prisma:generate",
+    "prisma:migrate": "npm --prefix backend run prisma:migrate",
+    "prisma:seed": "npm --prefix backend run prisma:seed"
+  }
+}
