@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
-import { X, Sparkles, AlertCircle } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 
 const FALLBACK_DEPARTMENTS = [
   { id: '466b22f2-dae6-4a2b-b7a2-a98503cfa2a6', name: 'Computer Science & Engineering' },
@@ -92,11 +92,11 @@ export const AuthModal = () => {
           }}
         >
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)' }}>
               {tab === 'login' ? 'Sign in to AlumniConnect' : 'Create an Account'}
             </h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              {tab === 'login' ? 'Welcome back! Enter your details.' : 'Join the student and alumni network.'}
+            <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              {tab === 'login' ? 'Welcome back! Enter your collegiate credentials.' : 'Join the verified student and alumni network.'}
             </p>
           </div>
           <button
@@ -106,6 +106,7 @@ export const AuthModal = () => {
               border: 'none',
               color: 'var(--text-muted)',
               cursor: 'pointer',
+              padding: '4px',
             }}
           >
             <X size={20} />
@@ -119,11 +120,12 @@ export const AuthModal = () => {
               flex: 1,
               padding: '12px',
               border: 'none',
-              background: tab === 'login' ? 'var(--bg-surface)' : 'transparent',
+              background: tab === 'login' ? '#FFFFFF' : 'transparent',
               color: tab === 'login' ? 'var(--primary)' : 'var(--text-muted)',
-              fontWeight: tab === 'login' ? '600' : '400',
+              fontWeight: tab === 'login' ? '700' : '500',
               cursor: 'pointer',
               borderBottom: tab === 'login' ? '2px solid var(--primary)' : 'none',
+              transition: 'all 0.15s ease',
             }}
             onClick={() => { setTab('login'); setError(''); }}
           >
@@ -134,11 +136,12 @@ export const AuthModal = () => {
               flex: 1,
               padding: '12px',
               border: 'none',
-              background: tab === 'register' ? 'var(--bg-surface)' : 'transparent',
+              background: tab === 'register' ? '#FFFFFF' : 'transparent',
               color: tab === 'register' ? 'var(--primary)' : 'var(--text-muted)',
-              fontWeight: tab === 'register' ? '600' : '400',
+              fontWeight: tab === 'register' ? '700' : '500',
               cursor: 'pointer',
               borderBottom: tab === 'register' ? '2px solid var(--primary)' : 'none',
+              transition: 'all 0.15s ease',
             }}
             onClick={() => { setTab('register'); setError(''); }}
           >
@@ -158,6 +161,7 @@ export const AuthModal = () => {
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--danger-bg)',
                 color: 'var(--danger)',
+                border: '1px solid rgba(154, 52, 18, 0.2)',
                 fontSize: '13px',
                 marginBottom: '16px',
               }}
@@ -175,17 +179,31 @@ export const AuthModal = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <button
                     type="button"
-                    className={`btn ${role === 'STUDENT' ? 'btn-primary' : 'btn-secondary'}`}
+                    className="btn"
                     onClick={() => setRole('STUDENT')}
-                    style={{ fontSize: '13px', padding: '10px' }}
+                    style={{
+                      fontSize: '13px',
+                      padding: '10px',
+                      background: role === 'STUDENT' ? 'var(--primary)' : 'var(--bg-card)',
+                      color: role === 'STUDENT' ? '#FFFFFF' : 'var(--text-main)',
+                      border: role === 'STUDENT' ? '1px solid var(--primary)' : '1px solid var(--border-subtle)',
+                      fontWeight: role === 'STUDENT' ? '600' : '500',
+                    }}
                   >
                     🎓 College Student
                   </button>
                   <button
                     type="button"
-                    className={`btn ${role === 'ALUMNI' ? 'btn-primary' : 'btn-secondary'}`}
+                    className="btn"
                     onClick={() => setRole('ALUMNI')}
-                    style={{ fontSize: '13px', padding: '10px' }}
+                    style={{
+                      fontSize: '13px',
+                      padding: '10px',
+                      background: role === 'ALUMNI' ? 'var(--primary)' : 'var(--bg-card)',
+                      color: role === 'ALUMNI' ? '#FFFFFF' : 'var(--text-main)',
+                      border: role === 'ALUMNI' ? '1px solid var(--primary)' : '1px solid var(--border-subtle)',
+                      fontWeight: role === 'ALUMNI' ? '600' : '500',
+                    }}
                   >
                     💼 Verified Alumnus
                   </button>
@@ -210,11 +228,10 @@ export const AuthModal = () => {
                   className="input-field"
                   value={departmentId}
                   onChange={(e) => setDepartmentId(e.target.value)}
-                  style={{ background: 'var(--bg-input)', color: '#fff' }}
                   required
                 >
                   {departments.map((dept) => (
-                    <option key={dept.id} value={dept.id} style={{ background: '#1e293b', color: '#fff' }}>
+                    <option key={dept.id} value={dept.id}>
                       {dept.name}
                     </option>
                   ))}
@@ -288,7 +305,7 @@ export const AuthModal = () => {
                   <input
                     type="text"
                     className="input-field"
-                    placeholder="e.g. SWE"
+                    placeholder="e.g. Software Engineer"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
                   />

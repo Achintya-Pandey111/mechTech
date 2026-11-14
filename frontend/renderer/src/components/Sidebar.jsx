@@ -33,16 +33,25 @@ export const Sidebar = () => {
       style={{
         width: '260px',
         borderRight: '1px solid var(--border-subtle)',
-        background: 'rgba(10, 14, 23, 0.95)',
+        background: '#FAF6F0',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '20px 16px',
+        padding: '24px 16px',
         flexShrink: 0,
       }}
     >
       <div>
-        <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '0 12px 12px' }}>
+        <div
+          style={{
+            fontSize: '11px',
+            fontWeight: '700',
+            color: 'var(--text-dim)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.8px',
+            padding: '0 12px 14px',
+          }}
+        >
           Platform Menu
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -60,9 +69,9 @@ export const Sidebar = () => {
                   width: '100%',
                   padding: '10px 12px',
                   borderRadius: 'var(--radius-md)',
-                  background: isActive ? 'var(--primary-glow)' : 'transparent',
-                  border: isActive ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid transparent',
-                  color: isActive ? '#818cf8' : 'var(--text-muted)',
+                  background: isActive ? 'var(--primary-light)' : 'transparent',
+                  border: isActive ? '1px solid #DFD2C4' : '1px solid transparent',
+                  color: isActive ? 'var(--primary)' : 'var(--text-muted)',
                   fontSize: '13.5px',
                   fontWeight: isActive ? '600' : '500',
                   cursor: 'pointer',
@@ -71,10 +80,10 @@ export const Sidebar = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Icon size={18} color={isActive ? '#818cf8' : 'var(--text-dim)'} />
+                  <Icon size={18} color={isActive ? 'var(--primary)' : 'var(--text-dim)'} />
                   <span>{item.label}</span>
                 </div>
-                {isActive && <ChevronRight size={14} color="#818cf8" />}
+                {isActive && <ChevronRight size={14} color="var(--primary)" />}
               </button>
             );
           })}
@@ -86,23 +95,39 @@ export const Sidebar = () => {
         <div
           className="card"
           style={{
-            padding: '12px',
-            background: 'var(--bg-surface)',
+            padding: '14px',
+            background: '#FFFFFF',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
+            boxShadow: '0 1px 4px rgba(60, 40, 25, 0.04)',
           }}
         >
-          <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '4px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '3px', fontWeight: '500' }}>
             Signed in as
           </div>
-          <div style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>{user.name}</div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--text-main)' }}>{user.name}</div>
+          <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
             {user.role === 'STUDENT'
-              ? user.student?.department?.name || 'Student Account'
-              : user.alumni?.jobTitle
-              ? `${user.alumni.jobTitle} @ ${user.alumni.currentCompany || 'Company'}`
-              : `${user.role} Account`}
+              ? 'Student Account'
+              : user.role === 'ALUMNI'
+              ? 'Alumni Member'
+              : 'System Administrator'}
           </div>
+          {user.department?.name && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--accent-chocolate)',
+                marginTop: '6px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              title={user.department.name}
+            >
+              {user.department.name}
+            </div>
+          )}
         </div>
       )}
     </aside>

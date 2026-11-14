@@ -9,7 +9,6 @@ import {
   Shield,
   Briefcase,
   CheckCircle,
-  Sparkles,
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -35,8 +34,8 @@ export const Navbar = () => {
       style={{
         height: '68px',
         borderBottom: '1px solid var(--border-subtle)',
-        background: 'rgba(10, 14, 23, 0.85)',
-        backdropFilter: 'blur(16px)',
+        background: 'rgba(251, 248, 244, 0.95)',
+        backdropFilter: 'blur(12px)',
         position: 'sticky',
         top: 0,
         zIndex: 50,
@@ -56,18 +55,18 @@ export const Navbar = () => {
             width: '40px',
             height: '40px',
             borderRadius: 'var(--radius-md)',
-            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+            background: 'linear-gradient(135deg, #6D4333 0%, #8D5B46 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 15px rgba(99, 102, 241, 0.4)',
+            boxShadow: '0 2px 8px rgba(109, 67, 51, 0.22)',
           }}
         >
-          <GraduationCap size={24} color="#ffffff" />
+          <GraduationCap size={22} color="#FFFFFF" />
         </div>
         <div>
-          <span style={{ fontSize: '18px', fontWeight: '700', letterSpacing: '-0.3px', color: '#fff' }}>
-            Alumni<span style={{ color: '#818cf8' }}>Connect</span>
+          <span style={{ fontSize: '18px', fontWeight: '700', letterSpacing: '-0.3px', color: 'var(--text-main)' }}>
+            Alumni<span style={{ color: 'var(--accent-chocolate)' }}>Connect</span>
           </span>
           <span
             style={{
@@ -77,7 +76,7 @@ export const Navbar = () => {
               lineHeight: 1,
             }}
           >
-            Engineering Network
+            Engineering & Alumni Network
           </span>
         </div>
       </div>
@@ -94,17 +93,19 @@ export const Navbar = () => {
           border: '1px solid var(--border-subtle)',
         }}
       >
-        <span style={{ fontSize: '11px', color: 'var(--text-dim)', padding: '0 4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Sparkles size={12} color="#818cf8" /> Preview Role:
+        <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', padding: '0 4px', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '500' }}>
+          <GraduationCap size={13} color="var(--accent-chocolate)" /> Preview:
         </span>
         <button
           className="btn btn-sm"
           style={{
             padding: '3px 10px',
             fontSize: '12px',
-            background: user?.role === 'STUDENT' ? 'var(--primary)' : 'transparent',
-            color: user?.role === 'STUDENT' ? '#fff' : 'var(--text-muted)',
+            fontWeight: '600',
+            background: user?.role === 'STUDENT' ? '#26533F' : 'transparent',
+            color: user?.role === 'STUDENT' ? '#FFFFFF' : 'var(--text-muted)',
             borderRadius: 'var(--radius-full)',
+            border: user?.role === 'STUDENT' ? '1px solid #1e4534' : '1px solid transparent',
           }}
           onClick={() => switchRoleDemo('STUDENT')}
         >
@@ -115,9 +116,11 @@ export const Navbar = () => {
           style={{
             padding: '3px 10px',
             fontSize: '12px',
-            background: user?.role === 'ALUMNI' ? '#a855f7' : 'transparent',
-            color: user?.role === 'ALUMNI' ? '#fff' : 'var(--text-muted)',
+            fontWeight: '600',
+            background: user?.role === 'ALUMNI' ? '#7A4B1A' : 'transparent',
+            color: user?.role === 'ALUMNI' ? '#FFFFFF' : 'var(--text-muted)',
             borderRadius: 'var(--radius-full)',
+            border: user?.role === 'ALUMNI' ? '1px solid #643c13' : '1px solid transparent',
           }}
           onClick={() => switchRoleDemo('ALUMNI')}
         >
@@ -128,9 +131,11 @@ export const Navbar = () => {
           style={{
             padding: '3px 10px',
             fontSize: '12px',
-            background: user?.role === 'ADMIN' ? '#ef4444' : 'transparent',
-            color: user?.role === 'ADMIN' ? '#fff' : 'var(--text-muted)',
+            fontWeight: '600',
+            background: user?.role === 'ADMIN' ? '#8B2E24' : 'transparent',
+            color: user?.role === 'ADMIN' ? '#FFFFFF' : 'var(--text-muted)',
             borderRadius: 'var(--radius-full)',
+            border: user?.role === 'ADMIN' ? '1px solid #73241b' : '1px solid transparent',
           }}
           onClick={() => switchRoleDemo('ADMIN')}
         >
@@ -148,7 +153,7 @@ export const Navbar = () => {
             onClick={() => setShowNotifications(!showNotifications)}
             title="Notifications"
           >
-            <Bell size={18} />
+            <Bell size={18} color="var(--text-main)" />
             {unreadNotificationsCount > 0 && (
               <span
                 style={{
@@ -158,14 +163,14 @@ export const Navbar = () => {
                   width: '18px',
                   height: '18px',
                   borderRadius: '50%',
-                  background: '#ef4444',
+                  background: 'var(--danger)',
                   color: 'white',
                   fontSize: '10px',
                   fontWeight: 'bold',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
+                  boxShadow: '0 1px 4px rgba(154, 52, 18, 0.4)',
                 }}
               >
                 {unreadNotificationsCount}
@@ -199,9 +204,9 @@ export const Navbar = () => {
                   borderBottom: '1px solid var(--border-subtle)',
                 }}
               >
-                <span style={{ fontSize: '13px', fontWeight: '600' }}>Notifications</span>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-main)' }}>Notifications</span>
                 <span
-                  style={{ fontSize: '11px', color: 'var(--primary)', cursor: 'pointer' }}
+                  style={{ fontSize: '11px', color: 'var(--primary)', cursor: 'pointer', fontWeight: '500' }}
                   onClick={() => setShowNotifications(false)}
                 >
                   Close
@@ -211,13 +216,13 @@ export const Navbar = () => {
                 <div
                   key={n.id}
                   style={{
-                    padding: '8px',
+                    padding: '8px 10px',
                     borderRadius: 'var(--radius-md)',
                     background: 'var(--bg-input)',
                     marginBottom: '6px',
                   }}
                 >
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#fff' }}>{n.title}</div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-main)' }}>{n.title}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{n.desc}</div>
                   <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>{n.time}</div>
                 </div>
@@ -243,19 +248,20 @@ export const Navbar = () => {
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #4f46e5, #06b6d4)',
+                  background: 'linear-gradient(135deg, #6D4333, #8D5B46)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: '600',
                   fontSize: '14px',
                   color: 'white',
+                  boxShadow: '0 1px 4px rgba(109, 67, 51, 0.2)',
                 }}
               >
                 {user.name?.charAt(0) || 'U'}
               </div>
               <div style={{ lineHeight: 1.2 }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>{user.name}</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-main)' }}>{user.name}</div>
                 <span className={`badge badge-${user.role.toLowerCase()}`}>{user.role}</span>
               </div>
             </div>
@@ -265,7 +271,7 @@ export const Navbar = () => {
               title="Logout"
               style={{ padding: '6px 10px' }}
             >
-              <LogOut size={15} />
+              <LogOut size={15} color="var(--text-muted)" />
             </button>
           </div>
         ) : (
