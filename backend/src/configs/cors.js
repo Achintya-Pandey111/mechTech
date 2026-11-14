@@ -11,7 +11,13 @@ const allowedOrigins = [
 export const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (such as Electron desktop app, curl, mobile apps)
-    if (!origin || allowedOrigins.includes(origin) || env.NODE_ENV === "development") {
+    // or allowed explicit origins, or any Vercel deployment (*.vercel.app), or localhost
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      env.NODE_ENV === "development" ||
+      origin.endsWith(".vercel.app")
+    ) {
       return callback(null, true);
     }
     return callback(new Error(`Origin ${origin} not allowed by CORS policy`));
