@@ -19,7 +19,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "dev:web": "npm --prefix renderer run dev",
+    "build": "npm --prefix renderer run build"
   },
   "keywords": [],
   "author": "",
