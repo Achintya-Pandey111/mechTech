@@ -6,6 +6,7 @@ import forumRoutes from "./forum.route.js";
 import mentorshipRoutes from "./mentorship.route.js";
 import opportunityRoutes from "./opportunity.route.js";
 import adminRoutes from "./admin.route.js";
+import { listDepartments } from "../controllers/admin.controller.js";
 
 const apiRouter = Router();
 
@@ -17,6 +18,9 @@ apiRouter.get("/health", (req, res) => {
     service: "AlumniConnect Backend API",
   });
 });
+
+// Public lookup routes
+apiRouter.get("/departments", listDepartments);
 
 // Modular Routes for 8 Core Tables
 apiRouter.use("/auth", authRoutes);

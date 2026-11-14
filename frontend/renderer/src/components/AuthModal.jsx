@@ -1,6 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import api from '../services/api.js';
 import { X, Sparkles, AlertCircle } from 'lucide-react';
+
+const FALLBACK_DEPARTMENTS = [
+  { id: '466b22f2-dae6-4a2b-b7a2-a98503cfa2a6', name: 'Computer Science & Engineering' },
+  { id: '86b47473-dedb-4f8d-874c-b8ee415e4bbf', name: 'Information Technology' },
+  { id: '734439a0-b036-41aa-8007-61abd11197c2', name: 'Mechanical Engineering' }
+];
 
 export const AuthModal = () => {
   const { isAuthModalOpen, closeAuthModal, authModalTab, login, register } = useAuth();
@@ -18,7 +25,27 @@ export const AuthModal = () => {
   const [studentNumber, setStudentNumber] = useState('');
   const [currentCompany, setCurrentCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
-  const [departmentId, setDepartmentId] = useState('dept-cs');
+  const [departments, setDepartments] = useState(FALLBACK_DEPARTMENTS);
+  const [departmentId, setDepartmentId] = useState(FALLBACK_DEPARTMENTS[0].id);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.request('/departments')
+      .then((res) => {
+        if (!isMounted) return;
+        const list = res?.departments || res;
+        if (Array.isArray(list) && list.length > 0) {
+          setDepartments(list);
+          setDepartmentId(list[0].id);
+        }
+      })
+      .catch(() => {
+        // Keeps fallback departments
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   if (!isAuthModalOpen) return null;
 
@@ -36,7 +63,7 @@ export const AuthModal = () => {
           email,
           password,
           role,
-          departmentId: departmentId || 'dept-cs',
+          departmentId: departmentId || undefined,
           graduationYear: Number(graduationYear),
           batchYear: Number(batchYear),
           studentNumber,
@@ -175,6 +202,23 @@ export const AuthModal = () => {
                   onChange={(e) => setName(e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Department / Branch</label>
+                <select
+                  className="input-field"
+                  value={departmentId}
+                  onChange={(e) => setDepartmentId(e.target.value)}
+                  style={{ background: 'var(--bg-input)', color: '#fff' }}
+                  required
+                >
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id} style={{ background: '#1e293b', color: '#fff' }}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </>
           )}

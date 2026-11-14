@@ -36,15 +36,26 @@ export const register = async (req, res, next) => {
       throw new ApiError(409, "User with this email already exists");
     }
 
-    // Default to first department if not passed
-    let assignedDeptId = departmentId;
+    // Default to first department if not passed or not a valid UUID
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    let assignedDeptId = null;
+
+    if (departmentId && UUID_REGEX.test(departmentId)) {
+      const existingDept = await prisma.department.findUnique({
+        where: { id: departmentId },
+      });
+      if (existingDept) {
+        assignedDeptId = existingDept.id;
+      }
+    }
+
     if (!assignedDeptId) {
       const defaultDept = await prisma.department.findFirst();
       assignedDeptId = defaultDept ? defaultDept.id : null;
     }
 
     if (!assignedDeptId) {
-      throw new ApiError(400, "A valid departmentId is required");
+      throw new ApiError(400, "A valid department is required");
     }
 
     const passwordHash = await hashPassword(password);
