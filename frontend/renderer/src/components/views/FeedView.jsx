@@ -6,7 +6,7 @@ import {
   Heart,
   MessageCircle,
   Send,
-  Sparkles,
+  MessageSquareQuote,
   Share2,
   Trash2,
 } from 'lucide-react';
@@ -143,8 +143,8 @@ export const FeedView = () => {
       {/* Create Post Card */}
       <div className="card" style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-          <Sparkles size={18} color="#818cf8" />
-          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#fff' }}>Share an update or question</h3>
+          <MessageSquareQuote size={18} color="var(--primary)" />
+          <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)' }}>Share an update or question</h3>
         </div>
         <form onSubmit={handleCreatePost}>
           <input
@@ -184,19 +184,20 @@ export const FeedView = () => {
                     width: '38px',
                     height: '38px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                    background: 'linear-gradient(135deg, #6D4333, #8D5B46)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 'bold',
                     fontSize: '14px',
+                    color: '#FFFFFF',
                   }}
                 >
                   {post.author?.name?.charAt(0) || 'U'}
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#fff' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-main)' }}>
                       {post.author?.name}
                     </span>
                     <span className={`badge badge-${post.author?.role?.toLowerCase() || 'student'}`}>
@@ -217,7 +218,7 @@ export const FeedView = () => {
 
             {/* Post Title & Content */}
             {post.title && (
-              <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
                 {post.title}
               </h4>
             )}
@@ -238,13 +239,13 @@ export const FeedView = () => {
               <button
                 className="btn btn-sm"
                 style={{
-                  background: post.liked ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
-                  color: post.liked ? '#ef4444' : 'var(--text-muted)',
+                  background: post.liked ? 'var(--danger-bg)' : 'transparent',
+                  color: post.liked ? 'var(--danger)' : 'var(--text-muted)',
                   border: '1px solid var(--border-subtle)',
                 }}
                 onClick={() => handleToggleLike(post.id)}
               >
-                <Heart size={15} fill={post.liked ? '#ef4444' : 'none'} />
+                <Heart size={15} fill={post.liked ? 'var(--danger)' : 'none'} />
                 <span>{post._count?.likes || 0}</span>
               </button>
 
@@ -277,7 +278,7 @@ export const FeedView = () => {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#fff' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-main)' }}>
                           {c.author?.name}
                         </span>
                         <span className={`badge badge-${c.author?.role?.toLowerCase() || 'student'}`} style={{ fontSize: '9px', padding: '1px 5px' }}>

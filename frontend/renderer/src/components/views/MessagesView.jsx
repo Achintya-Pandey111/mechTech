@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import api from '../../services/api.js';
 import { mockConversations } from '../../services/mockData.js';
@@ -9,8 +9,11 @@ export const MessagesView = () => {
   const [conversations, setConversations] = useState(mockConversations);
   const [activeConvId, setActiveConvId] = useState(mockConversations[0]?.id);
   const [messages, setMessages] = useState(mockConversations[0]?.messages || []);
-  const [inputContent, setInputContent] = useState('');
-  const messagesEndRef = useRef(null);
+  const [inputMessage, setInputMessage] = useState('');
+
+  const activeConv = conversations.find((c) => c.id === activeConvId);
+  const otherParticipant =
+    user?.role === 'STUDENT' ? activeConv?.alumni?.user : activeConv?.student?.user;
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -18,7 +21,9 @@ export const MessagesView = () => {
         const data = await api.getConversations();
         if (data?.conversations && data.conversations.length > 0) {
           setConversations(data.conversations);
-          setActiveConvId(data.conversations[0].id);
+          if (!activeConvId) {
+            setActiveConvId(data.conversations[0].id);
+          }
         }
       } catch (err) {
         // Keeps mock conversations
@@ -28,57 +33,45 @@ export const MessagesView = () => {
   }, []);
 
   useEffect(() => {
-    const active = conversations.find((c) => c.id === activeConvId);
-    if (active) {
-      setMessages(active.messages || []);
+    if (activeConv) {
+      setMessages(activeConv.messages || []);
     }
   }, [activeConvId, conversations]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputContent.trim()) return;
-
-    const content = inputContent.trim();
-    setInputContent('');
+    if (!inputMessage.trim() || !activeConvId) return;
 
     const newMsg = {
-      id: `m-${Date.now()}`,
+      id: `msg-${Date.now()}`,
       senderId: user?.id,
-      content,
+      content: inputMessage,
       createdAt: new Date().toISOString(),
-      sender: { id: user?.id, name: user?.name },
+      sender: { name: user?.name, role: user?.role },
     };
 
     try {
-      await api.sendMessage(activeConvId, content);
+      await api.sendMessage(activeConvId, inputMessage);
     } catch (err) {
-      // preview optimistic update
+      console.warn('Message sent in offline simulated mode');
     }
 
-    setMessages((prev) => [...prev, newMsg]);
+    setMessages([...messages, newMsg]);
 
-    // Update conversation snippet
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === activeConvId
-          ? {
-              ...c,
-              messages: [...(c.messages || []), newMsg],
-            }
-          : c
-      )
+    setConversations(
+      conversations.map((c) => {
+        if (c.id === activeConvId) {
+          return {
+            ...c,
+            messages: [...(c.messages || []), newMsg],
+          };
+        }
+        return c;
+      })
     );
-  };
 
-  const currentConv = conversations.find((c) => c.id === activeConvId);
-  const otherParticipant =
-    user?.role === 'STUDENT'
-      ? currentConv?.alumni?.user
-      : currentConv?.student?.user;
+    setInputMessage('');
+  };
 
   return (
     <div
@@ -86,10 +79,10 @@ export const MessagesView = () => {
         display: 'grid',
         gridTemplateColumns: '320px 1fr',
         gap: '20px',
-        height: 'calc(100vh - 120px)',
+        height: 'calc(100vh - 124px)',
       }}
     >
-      {/* Conversations List */}
+      {/* Conversation List */}
       <div
         className="card"
         style={{
@@ -99,7 +92,7 @@ export const MessagesView = () => {
           height: '100%',
         }}
       >
-        <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#fff', marginBottom: '14px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '14px' }}>
           Conversations
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto' }}>
@@ -116,8 +109,8 @@ export const MessagesView = () => {
                 style={{
                   padding: '12px',
                   borderRadius: 'var(--radius-md)',
-                  background: isSelected ? 'var(--primary-glow)' : 'var(--bg-input)',
-                  border: isSelected ? '1px solid var(--primary)' : '1px solid transparent',
+                  background: isSelected ? 'var(--primary-light)' : 'var(--bg-input)',
+                  border: isSelected ? '1px solid #DFD2C4' : '1px solid transparent',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
@@ -128,32 +121,43 @@ export const MessagesView = () => {
                       width: '36px',
                       height: '36px',
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #4f46e5, #06b6d4)',
+                      background: 'linear-gradient(135deg, #6D4333, #8D5B46)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: 'white',
                       fontWeight: 'bold',
                       fontSize: '13px',
+                      flexShrink: 0,
                     }}
                   >
                     {participant?.name?.charAt(0) || 'U'}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>
-                      {participant?.name}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--text-main)' }}>
+                        {participant?.name}
+                      </span>
+                      {lastMsg && (
+                        <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
+                          {new Date(lastMsg.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--text-dim)',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {lastMsg ? lastMsg.content : 'No messages yet'}
-                    </div>
+                    {lastMsg && (
+                      <p
+                        style={{
+                          fontSize: '12px',
+                          color: 'var(--text-muted)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          marginTop: '2px',
+                        }}
+                      >
+                        {lastMsg.content}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -162,7 +166,7 @@ export const MessagesView = () => {
         </div>
       </div>
 
-      {/* Active Chat Thread */}
+      {/* Chat Area */}
       <div
         className="card"
         style={{
@@ -178,7 +182,6 @@ export const MessagesView = () => {
           style={{
             padding: '16px 20px',
             borderBottom: '1px solid var(--border-subtle)',
-            background: 'var(--bg-surface)',
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
@@ -189,86 +192,81 @@ export const MessagesView = () => {
               width: '38px',
               height: '38px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #a855f7, #6366f1)',
+              background: 'linear-gradient(135deg, #6D4333, #8D5B46)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: 'white',
               fontWeight: 'bold',
             }}
           >
             {otherParticipant?.name?.charAt(0) || 'C'}
           </div>
           <div>
-            <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>
-              {otherParticipant?.name || 'Direct Conversation'}
+            <h4 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)' }}>
+              {otherParticipant?.name}
             </h4>
             <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-              1-on-1 Mentorship & Career Guidance
+              {otherParticipant?.role === 'ALUMNI' ? 'Verified Alumnus Mentorship Chat' : 'Student Chat'}
             </span>
           </div>
         </div>
 
-        {/* Message Stream */}
+        {/* Messages Stream */}
         <div
           style={{
             flex: 1,
-            overflowY: 'auto',
             padding: '20px',
+            overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: '14px',
+            gap: '12px',
           }}
         >
           {messages.map((m) => {
-            const isMe = m.senderId === user?.id;
+            const isMe = m.senderId === user?.id || m.sender?.name === user?.name;
             return (
               <div
                 key={m.id}
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: isMe ? 'flex-end' : 'flex-start',
+                  alignSelf: isMe ? 'flex-end' : 'flex-start',
+                  maxWidth: '75%',
                 }}
               >
                 <div
                   style={{
-                    maxWidth: '70%',
-                    padding: '12px 16px',
-                    borderRadius: 'var(--radius-lg)',
+                    padding: '10px 14px',
+                    borderRadius: isMe ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
                     background: isMe ? 'var(--primary)' : 'var(--bg-input)',
-                    color: isMe ? '#ffffff' : 'var(--text-main)',
+                    color: isMe ? '#FFFFFF' : 'var(--text-main)',
+                    border: isMe ? 'none' : '1px solid var(--border-subtle)',
                     fontSize: '13.5px',
                     lineHeight: '1.5',
-                    boxShadow: isMe ? '0 2px 8px rgba(99, 102, 241, 0.3)' : 'none',
-                    border: isMe ? 'none' : '1px solid var(--border-subtle)',
                   }}
                 >
                   {m.content}
                 </div>
-                <span
+                <div
                   style={{
                     fontSize: '10px',
                     color: 'var(--text-dim)',
-                    marginTop: '4px',
-                    padding: '0 4px',
+                    marginTop: '3px',
+                    textAlign: isMe ? 'right' : 'left',
                   }}
                 >
                   {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                </div>
               </div>
             );
           })}
-          <div ref={messagesEndRef} />
         </div>
 
-        {/* Message Input Form */}
+        {/* Message Input Box */}
         <form
           onSubmit={handleSendMessage}
           style={{
-            padding: '14px 20px',
+            padding: '14px 16px',
             borderTop: '1px solid var(--border-subtle)',
-            background: 'var(--bg-surface)',
             display: 'flex',
             gap: '10px',
           }}
@@ -276,12 +274,11 @@ export const MessagesView = () => {
           <input
             type="text"
             className="input-field"
-            placeholder="Type your message..."
-            value={inputContent}
-            onChange={(e) => setInputContent(e.target.value)}
-            style={{ fontSize: '13.5px' }}
+            placeholder="Type your message to alumni..."
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
           />
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-primary" style={{ padding: '0 18px' }}>
             <Send size={15} /> Send
           </button>
         </form>

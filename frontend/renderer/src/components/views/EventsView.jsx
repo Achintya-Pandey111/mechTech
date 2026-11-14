@@ -2,18 +2,28 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import api from '../../services/api.js';
 import { mockEvents } from '../../services/mockData.js';
-import { Calendar, MapPin, Users, Plus, CheckCircle2, Clock, X } from 'lucide-react';
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  Plus,
+  X,
+  Users,
+  CheckCircle,
+} from 'lucide-react';
 
 export const EventsView = () => {
   const { user } = useAuth();
   const [events, setEvents] = useState(mockEvents);
   const [isCreating, setIsCreating] = useState(false);
+  const [registeredEvents, setRegisteredEvents] = useState({});
 
-  // New Event Form
+  // New event form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startsAt, setStartsAt] = useState('');
   const [location, setLocation] = useState('');
+  const [startsAt, setStartsAt] = useState('');
+  const [endsAt, setEndsAt] = useState('');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -29,75 +39,52 @@ export const EventsView = () => {
     fetchEvents();
   }, []);
 
-  const handleToggleRegistration = async (eventId) => {
-    setEvents(
-      events.map((ev) => {
-        if (ev.id === eventId) {
-          const registered = !ev.isRegistered;
-          const count = (ev._count?.registrations || 0) + (registered ? 1 : -1);
-          return {
-            ...ev,
-            isRegistered: registered,
-            _count: { registrations: Math.max(0, count) },
-          };
-        }
-        return ev;
-      })
-    );
-
-    try {
-      const target = events.find((e) => e.id === eventId);
-      if (target?.isRegistered) {
-        await api.unregisterEvent(eventId);
-      } else {
-        await api.registerEvent(eventId);
-      }
-    } catch (err) {
-      // preview update
-    }
+  const handleRegisterEvent = (eventId) => {
+    setRegisteredEvents((prev) => ({
+      ...prev,
+      [eventId]: !prev[eventId],
+    }));
   };
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
-    const newEvent = {
-      id: `ev-${Date.now()}`,
-      title,
-      description,
-      startsAt: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
-      location,
-      createdBy: { name: user?.name, role: user?.role },
-      _count: { registrations: 1 },
-      isRegistered: true,
-    };
-
     try {
-      await api.createEvent(newEvent);
-    } catch (err) {
-      // preview update
-    }
+      const data = await api.createEvent({
+        title,
+        description,
+        location,
+        startsAt,
+        endsAt: endsAt || null,
+      });
 
-    setEvents([newEvent, ...events]);
-    setIsCreating(false);
-    setTitle('');
-    setDescription('');
-    setStartsAt('');
-    setLocation('');
+      const newEvent = data?.event || {
+        id: `ev-${Date.now()}`,
+        title,
+        description,
+        location,
+        startsAt,
+        endsAt,
+        organizer: { user: { name: user?.name || 'Community Member' } },
+        _count: { attendees: 1 },
+      };
+
+      setEvents([newEvent, ...events]);
+      setIsCreating(false);
+      setTitle('');
+      setDescription('');
+      setLocation('');
+      setStartsAt('');
+      setEndsAt('');
+    } catch (err) {
+      alert('Could not publish event: ' + err.message);
+    }
   };
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px',
-          marginBottom: '24px',
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#fff', marginBottom: '6px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '6px' }}>
             Events & Technical Workshops
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
@@ -114,7 +101,7 @@ export const EventsView = () => {
         {events.map((ev) => (
           <div key={ev.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#818cf8', fontSize: '13px', fontWeight: '600' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: 'var(--accent-chocolate)', fontSize: '13px', fontWeight: '600' }}>
                 <Calendar size={15} />
                 <span>
                   {new Date(ev.startsAt).toLocaleDateString(undefined, {
@@ -127,7 +114,7 @@ export const EventsView = () => {
                 </span>
               </div>
 
-              <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
                 {ev.title}
               </h3>
 
@@ -144,28 +131,27 @@ export const EventsView = () => {
 
             <div
               style={{
-                paddingTop: '14px',
-                borderTop: '1px solid var(--border-subtle)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                paddingTop: '14px',
+                borderTop: '1px solid var(--border-subtle)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-dim)' }}>
-                <Users size={14} />
-                <span>{ev._count?.registrations || 0} Registered</span>
+              <div style={{ fontSize: '12px', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Users size={14} /> {((ev._count?.attendees || 0) + (registeredEvents[ev.id] ? 1 : 0))} attending
               </div>
 
               <button
-                className={`btn btn-sm ${ev.isRegistered ? 'btn-secondary' : 'btn-primary'}`}
-                onClick={() => handleToggleRegistration(ev.id)}
+                className={`btn btn-sm ${registeredEvents[ev.id] ? 'btn-secondary' : 'btn-primary'}`}
+                onClick={() => handleRegisterEvent(ev.id)}
               >
-                {ev.isRegistered ? (
+                {registeredEvents[ev.id] ? (
                   <>
-                    <CheckCircle2 size={14} color="#10b981" /> Registered
+                    <CheckCircle size={14} color="var(--success)" /> Registered
                   </>
                 ) : (
-                  'RSVP / Register'
+                  'RSVP Attend'
                 )}
               </button>
             </div>
@@ -186,8 +172,8 @@ export const EventsView = () => {
                 alignItems: 'center',
               }}
             >
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff' }}>
-                Host an Event or Meetup
+              <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-main)' }}>
+                Host an Event or Meet
               </h3>
               <button
                 onClick={() => setIsCreating(false)}
@@ -203,16 +189,28 @@ export const EventsView = () => {
                 <input
                   type="text"
                   className="input-field"
-                  placeholder="e.g. System Design Primer & Career AMA"
+                  placeholder="e.g. Alumni AMA: Navigating Tech in 2026"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
               </div>
 
+              <div className="input-group">
+                <label className="input-label">Location / Link</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g. Auditorium Hall B / Zoom Link"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  required
+                />
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div className="input-group">
-                  <label className="input-label">Date & Time</label>
+                  <label className="input-label">Start Date & Time</label>
                   <input
                     type="datetime-local"
                     className="input-field"
@@ -222,23 +220,22 @@ export const EventsView = () => {
                   />
                 </div>
                 <div className="input-group">
-                  <label className="input-label">Location / Link</label>
+                  <label className="input-label">End Date & Time</label>
                   <input
-                    type="text"
+                    type="datetime-local"
                     className="input-field"
-                    placeholder="e.g. Google Meet or Auditorium A"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={endsAt}
+                    onChange={(e) => setEndsAt(e.target.value)}
                   />
                 </div>
               </div>
 
               <div className="input-group">
-                <label className="input-label">Event Description & Agenda</label>
+                <label className="input-label">Event Agenda & Description</label>
                 <textarea
                   className="textarea-field"
                   rows="4"
-                  placeholder="Describe topics covered, target audience, and what students will learn..."
+                  placeholder="Outline the schedule, speaker details, and who should join..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required

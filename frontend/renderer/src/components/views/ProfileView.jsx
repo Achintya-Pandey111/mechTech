@@ -1,80 +1,103 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import api from '../../services/api.js';
-import { User, GraduationCap, Building, Plus, Trash2, CheckCircle2, Shield } from 'lucide-react';
+import {
+  User,
+  Building,
+  GraduationCap,
+  Briefcase,
+  CheckCircle,
+  Plus,
+  X,
+  Save,
+} from 'lucide-react';
 
 export const ProfileView = () => {
   const { user } = useAuth();
-  const [skills, setSkills] = useState(user?.skills || [
-    { proficiency: 'ADVANCED', skill: { id: 'sk-1', name: 'JavaScript' } },
-    { proficiency: 'INTERMEDIATE', skill: { id: 'sk-2', name: 'React' } },
-    { proficiency: 'INTERMEDIATE', skill: { id: 'sk-3', name: 'Node.js' } },
-    { proficiency: 'BEGINNER', skill: { id: 'sk-4', name: 'PostgreSQL' } },
-  ]);
-
-  const [newSkillName, setNewSkillName] = useState('');
-  const [newSkillProficiency, setNewSkillProficiency] = useState('INTERMEDIATE');
-
-  // Form states for profile
+  const [profile, setProfile] = useState(null);
   const [name, setName] = useState(user?.name || '');
-  const [company, setCompany] = useState(user?.alumni?.currentCompany || '');
-  const [jobTitle, setJobTitle] = useState(user?.alumni?.jobTitle || '');
-  const [studentNumber, setStudentNumber] = useState(user?.student?.studentNumber || '');
+  const [studentNumber, setStudentNumber] = useState('');
+  const [batchYear, setBatchYear] = useState('2021');
+  const [graduationYear, setGraduationYear] = useState('2025');
+  const [company, setCompany] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [skills, setSkills] = useState(['Distributed Systems', 'PostgreSQL', 'Node.js', 'React']);
+  const [newSkill, setNewSkill] = useState('');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  const handleAddSkill = async (e) => {
-    e.preventDefault();
-    if (!newSkillName.trim()) return;
+  const isStudent = user?.role === 'STUDENT';
+  const isAlumni = user?.role === 'ALUMNI';
 
-    const skillObj = {
-      proficiency: newSkillProficiency,
-      skill: { id: `sk-${Date.now()}`, name: newSkillName.trim() },
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await api.getProfile('me');
+        if (data?.user) {
+          setProfile(data.user);
+          setName(data.user.name || '');
+          if (data.user.student) {
+            setStudentNumber(data.user.student.studentNumber || '');
+            setBatchYear(data.user.student.batchYear || '2021');
+            setGraduationYear(data.user.student.graduationYear || '2025');
+          }
+          if (data.user.alumni) {
+            setCompany(data.user.alumni.currentCompany || '');
+            setJobTitle(data.user.alumni.jobTitle || '');
+            setGraduationYear(data.user.alumni.graduationYear || '2021');
+          }
+        }
+      } catch (err) {
+        // Keeps mock state
+      }
     };
+    fetchProfile();
+  }, []);
 
-    try {
-      await api.addSkill(newSkillName.trim(), newSkillProficiency);
-    } catch (err) {
-      // preview update
-    }
-
-    setSkills([...skills, skillObj]);
-    setNewSkillName('');
+  const handleAddSkill = (e) => {
+    e.preventDefault();
+    if (!newSkill.trim() || skills.includes(newSkill.trim())) return;
+    setSkills([...skills, newSkill.trim()]);
+    setNewSkill('');
   };
 
-  const handleRemoveSkill = async (index, skillId) => {
-    try {
-      if (skillId) await api.removeSkill(skillId);
-    } catch (err) {
-      // preview update
-    }
-    setSkills(skills.filter((_, i) => i !== index));
+  const handleRemoveSkill = (skillToRemove) => {
+    setSkills(skills.filter((s) => s !== skillToRemove));
   };
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     try {
-      if (user?.role === 'STUDENT') {
-        await api.updateStudentProfile({ name, studentNumber });
-      } else if (user?.role === 'ALUMNI') {
-        await api.updateAlumniProfile({ name, currentCompany: company, jobTitle });
+      if (isStudent) {
+        await api.updateStudentProfile({
+          name,
+          studentNumber,
+          batchYear: Number(batchYear),
+          graduationYear: Number(graduationYear),
+        });
+      } else if (isAlumni) {
+        await api.updateAlumniProfile({
+          name,
+          currentCompany: company,
+          jobTitle,
+          graduationYear: Number(graduationYear),
+        });
       }
     } catch (err) {
-      // preview update
+      console.warn('Profile saved in local simulated mode');
     }
+
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2000);
   };
 
-  const isStudent = user?.role === 'STUDENT';
-
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#fff', marginBottom: '6px' }}>
-          My Profile & Skills
+        <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '6px' }}>
+          My Profile & Settings
         </h2>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
-          Manage your academic background, professional experience, and technical skill profile.
+          Manage your verified college affiliation, expertise, and contact information.
         </p>
       </div>
 
@@ -87,19 +110,20 @@ export const ProfileView = () => {
                 width: '64px',
                 height: '64px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                background: 'linear-gradient(135deg, #6D4333, #8D5B46)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '24px',
                 fontWeight: 'bold',
-                color: '#fff',
+                color: '#FFFFFF',
+                boxShadow: '0 2px 8px rgba(109, 67, 51, 0.25)',
               }}
             >
               {name?.charAt(0) || 'U'}
             </div>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff' }}>{name}</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)' }}>{name}</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                 <span className={`badge badge-${user?.role?.toLowerCase() || 'student'}`}>
                   {user?.role}
@@ -145,115 +169,94 @@ export const ProfileView = () => {
                   />
                 </div>
               )}
-            </div>
 
-            {!isStudent && (
+              {isAlumni && (
+                <div className="input-group">
+                  <label className="input-label">Job Title / Designation</label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    placeholder="e.g. Staff Architect"
+                  />
+                </div>
+              )}
+
               <div className="input-group">
-                <label className="input-label">Job Title</label>
+                <label className="input-label">Graduation Year</label>
                 <input
-                  type="text"
+                  type="number"
                   className="input-field"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="e.g. Senior Software Engineer"
+                  value={graduationYear}
+                  onChange={(e) => setGraduationYear(e.target.value)}
                 />
               </div>
-            )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
-              {savedSuccess && (
-                <span style={{ fontSize: '13px', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckCircle2 size={15} /> Changes saved successfully!
-                </span>
+              {isStudent && (
+                <div className="input-group">
+                  <label className="input-label">Batch Year</label>
+                  <input
+                    type="number"
+                    className="input-field"
+                    value={batchYear}
+                    onChange={(e) => setBatchYear(e.target.value)}
+                  />
+                </div>
               )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
               <button type="submit" className="btn btn-primary btn-sm">
-                Save Profile
+                <Save size={14} /> {savedSuccess ? 'Saved Successfully!' : 'Save Profile Changes'}
               </button>
             </div>
           </form>
         </div>
 
-        {/* Skills Manager */}
+        {/* Skills & Endorsements */}
         <div className="card">
-          <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>
-            Technical & Professional Skills
+          <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '14px' }}>
+            Technical Expertise & Endorsed Skills
           </h3>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-            Skills help match you with mentors, peer collaborations, and career opportunities.
-          </p>
 
-          {/* Current Skills List */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-            {skills.map((s, idx) => (
-              <div
-                key={idx}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+            {skills.map((s) => (
+              <span
+                key={s}
                 style={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: '6px',
                   padding: '6px 12px',
                   background: 'var(--bg-input)',
                   border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-full)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '13px',
+                  color: 'var(--text-main)',
                 }}
               >
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>
-                  {s.skill?.name || s.name}
-                </span>
-                <span
-                  style={{
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    textTransform: 'uppercase',
-                    color: '#818cf8',
-                    padding: '1px 6px',
-                    borderRadius: '4px',
-                    background: 'rgba(99, 102, 241, 0.15)',
-                  }}
-                >
-                  {s.proficiency}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveSkill(idx, s.skill?.id)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--text-dim)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
+                {s}
+                <X
+                  size={14}
+                  style={{ cursor: 'pointer', color: 'var(--text-dim)' }}
+                  onClick={() => handleRemoveSkill(s)}
+                />
+              </span>
             ))}
           </div>
 
-          {/* Add Skill Bar */}
           <form onSubmit={handleAddSkill} style={{ display: 'flex', gap: '10px' }}>
             <input
               type="text"
               className="input-field"
-              placeholder="Skill name (e.g. Python, Docker, Prisma, System Design)"
-              value={newSkillName}
-              onChange={(e) => setNewSkillName(e.target.value)}
-              style={{ flex: 2 }}
+              placeholder="Add skill (e.g. Kubernetes, Rust, Machine Learning)..."
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              style={{ maxWidth: '380px' }}
             />
-            <select
-              className="select-field"
-              value={newSkillProficiency}
-              onChange={(e) => setNewSkillProficiency(e.target.value)}
-              style={{ flex: 1 }}
-            >
-              <option value="BEGINNER">Beginner</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="ADVANCED">Advanced</option>
-              <option value="EXPERT">Expert</option>
-            </select>
-            <button type="submit" className="btn btn-primary btn-sm">
-              <Plus size={15} /> Add
+            <button type="submit" className="btn btn-secondary btn-sm">
+              <Plus size={14} /> Add Skill
             </button>
           </form>
         </div>
