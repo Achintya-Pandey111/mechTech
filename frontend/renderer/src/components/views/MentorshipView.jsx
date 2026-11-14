@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export const MentorshipView = () => {
-  const { user, setActiveTab } = useAuth();
+  const { user, setActiveTab, openAuthModal } = useAuth();
   const [mentorships, setMentorships] = useState([
     {
       id: 'm-demo-1',
@@ -85,6 +85,24 @@ export const MentorshipView = () => {
         );
     }
   };
+
+  if (!user) {
+    return (
+      <div style={{ maxWidth: '640px', margin: '60px auto 0', textAlign: 'center' }}>
+        <div className="card" style={{ padding: '36px 24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
+            Mentorship Hub Sign In Required
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+            Sign in to send and track mentorship requests with verified alumni mentors.
+          </p>
+          <button className="btn btn-primary" onClick={() => openAuthModal('login')}>
+            Sign In to Mentorship Hub
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '840px', margin: '0 auto' }}>

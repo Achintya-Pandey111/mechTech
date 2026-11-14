@@ -5,7 +5,7 @@ import { mockConversations } from '../../services/mockData.js';
 import { Send, User, MessageCircle, Shield } from 'lucide-react';
 
 export const MessagesView = () => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [conversations, setConversations] = useState(mockConversations);
   const [activeConvId, setActiveConvId] = useState(mockConversations[0]?.id);
   const [messages, setMessages] = useState(mockConversations[0]?.messages || []);
@@ -72,6 +72,24 @@ export const MessagesView = () => {
 
     setInputMessage('');
   };
+
+  if (!user) {
+    return (
+      <div style={{ maxWidth: '640px', margin: '60px auto 0', textAlign: 'center' }}>
+        <div className="card" style={{ padding: '36px 24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
+            Direct Messages Access Restricted
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+            Please sign in to exchange private direct messages with alumni and classmates.
+          </p>
+          <button className="btn btn-primary" onClick={() => openAuthModal('login')}>
+            Sign In to Messages
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

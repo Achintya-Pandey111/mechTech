@@ -10,7 +10,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: "AlumniConnect - Engineering & Alumni Network",
-    backgroundColor: "#0a0e17",
+    backgroundColor: "#FBF8F4",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -21,17 +21,21 @@ function createWindow() {
   const devUrl = "http://localhost:5173";
   const distPath = path.join(__dirname, "../renderer/dist/index.html");
 
-  // Check if Vite dev server is running on port 5173
-  const req = http.get(devUrl, () => {
-    win.loadURL(devUrl);
-  });
+  if (app.isPackaged) {
+    win.loadFile(distPath);
+  } else {
+    // Check if Vite dev server is running on port 5173
+    const req = http.get(devUrl, () => {
+      win.loadURL(devUrl);
+    });
 
-  req.on("error", () => {
-    // If Vite dev server is not running, load the compiled static bundle
-    if (fs.existsSync(distPath)) {
-      win.loadFile(distPath);
-    }
-  });
+    req.on("error", () => {
+      // If Vite dev server is not running, load the compiled static bundle
+      if (fs.existsSync(distPath)) {
+        win.loadFile(distPath);
+      }
+    });
+  }
 }
 
 app.whenReady().then(createWindow);
@@ -39,5 +43,11 @@ app.whenReady().then(createWindow);
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
+  }
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
   }
 });

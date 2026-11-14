@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export const Sidebar = () => {
-  const { activeTab, setActiveTab, user } = useAuth();
+  const { activeTab, setActiveTab, user, openAuthModal } = useAuth();
 
   const navItems = [
     { id: 'feed', label: 'Community Feed', icon: MessageSquareQuote },
@@ -91,7 +91,7 @@ export const Sidebar = () => {
       </div>
 
       {/* User Status Card */}
-      {user && (
+      {user ? (
         <div
           className="card"
           style={{
@@ -128,6 +128,32 @@ export const Sidebar = () => {
               {user.department.name}
             </div>
           )}
+        </div>
+      ) : (
+        <div
+          className="card"
+          style={{
+            padding: '14px',
+            background: '#FFFFFF',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 1px 4px rgba(60, 40, 25, 0.04)',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-main)', marginBottom: '3px' }}>
+            Welcome to AlumniConnect
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+            Sign in to access mentorship and your college network.
+          </div>
+          <button
+            className="btn btn-primary btn-sm"
+            style={{ width: '100%' }}
+            onClick={() => openAuthModal('login')}
+          >
+            Sign In
+          </button>
         </div>
       )}
     </aside>

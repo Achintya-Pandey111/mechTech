@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const ProfileView = () => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [profile, setProfile] = useState(null);
   const [name, setName] = useState(user?.name || '');
   const [studentNumber, setStudentNumber] = useState('');
@@ -89,6 +89,24 @@ export const ProfileView = () => {
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2000);
   };
+
+  if (!user) {
+    return (
+      <div style={{ maxWidth: '640px', margin: '60px auto 0', textAlign: 'center' }}>
+        <div className="card" style={{ padding: '36px 24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
+            Profile Access Restricted
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+            Please sign in with your student or alumni account to view and update your academic profile.
+          </p>
+          <button className="btn btn-primary" onClick={() => openAuthModal('login')}>
+            Sign In to Profile
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>

@@ -5,7 +5,7 @@ import { mockAlumniList } from '../../services/mockData.js';
 import { Search, Building, GraduationCap, Compass, Send, CheckCircle, X } from 'lucide-react';
 
 export const DirectoryView = () => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [alumniList, setAlumniList] = useState(mockAlumniList);
   const [search, setSearch] = useState('');
   const [selectedAlumni, setSelectedAlumni] = useState(null);
@@ -155,7 +155,13 @@ export const DirectoryView = () => {
               <button
                 className="btn btn-primary btn-sm"
                 style={{ width: '100%' }}
-                onClick={() => setSelectedAlumni(alm)}
+                onClick={() => {
+                  if (!user) {
+                    openAuthModal('login');
+                  } else {
+                    setSelectedAlumni(alm);
+                  }
+                }}
               >
                 <Compass size={14} /> Request Mentorship
               </button>

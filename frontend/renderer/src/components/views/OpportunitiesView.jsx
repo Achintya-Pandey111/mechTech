@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const OpportunitiesView = () => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [opportunities, setOpportunities] = useState(mockOpportunities);
   const [filterType, setFilterType] = useState('ALL');
   const [selectedOpp, setSelectedOpp] = useState(null);
@@ -191,7 +191,13 @@ export const OpportunitiesView = () => {
               <button
                 className="btn btn-primary btn-sm"
                 style={{ width: '100%' }}
-                onClick={() => setSelectedOpp(opp)}
+                onClick={() => {
+                  if (!user) {
+                    openAuthModal('login');
+                  } else {
+                    setSelectedOpp(opp);
+                  }
+                }}
               >
                 <Send size={14} /> Apply with Profile
               </button>

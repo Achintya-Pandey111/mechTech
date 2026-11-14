@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export const FeedView = () => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [posts, setPosts] = useState(mockPosts);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -36,6 +36,10 @@ export const FeedView = () => {
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
     if (!content.trim()) return;
 
     setIsSubmitting(true);
@@ -77,6 +81,10 @@ export const FeedView = () => {
   };
 
   const handleToggleLike = async (postId) => {
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
     try {
       await api.toggleLike(postId);
     } catch (err) {
@@ -99,6 +107,10 @@ export const FeedView = () => {
   };
 
   const handleAddComment = async (postId) => {
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
     const text = commentInputs[postId];
     if (!text || !text.trim()) return;
 
@@ -141,36 +153,52 @@ export const FeedView = () => {
   return (
     <div style={{ maxWidth: '780px', margin: '0 auto' }}>
       {/* Create Post Card */}
-      <div className="card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-          <MessageSquareQuote size={18} color="var(--primary)" />
-          <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)' }}>Share an update or question</h3>
-        </div>
-        <form onSubmit={handleCreatePost}>
-          <input
-            type="text"
-            className="input-field"
-            placeholder="Title / Topic (optional)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            style={{ marginBottom: '10px' }}
-          />
-          <textarea
-            className="textarea-field"
-            rows="3"
-            placeholder="Share technical knowledge, career advice, or ask questions to alumni..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            style={{ resize: 'vertical', marginBottom: '12px' }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" className="btn btn-primary btn-sm" disabled={isSubmitting}>
-              <Send size={14} /> {isSubmitting ? 'Posting...' : 'Publish Post'}
-            </button>
+      {user ? (
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+            <MessageSquareQuote size={18} color="var(--primary)" />
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)' }}>Share an update or question</h3>
           </div>
-        </form>
-      </div>
+          <form onSubmit={handleCreatePost}>
+            <input
+              type="text"
+              className="input-field"
+              placeholder="Title / Topic (optional)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              style={{ marginBottom: '10px' }}
+            />
+            <textarea
+              className="textarea-field"
+              rows="3"
+              placeholder="Share technical knowledge, career advice, or ask questions to alumni..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              required
+              style={{ resize: 'vertical', marginBottom: '12px' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button type="submit" className="btn btn-primary btn-sm" disabled={isSubmitting}>
+                <Send size={14} /> {isSubmitting ? 'Posting...' : 'Publish Post'}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : (
+        <div className="card" style={{ marginBottom: '24px', padding: '18px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+          <div>
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)' }}>
+              Join the Engineering Alumni Network
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              Sign in with your verified student or alumni account to publish posts, participate in discussions, and connect.
+            </p>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={() => openAuthModal('login')} style={{ flexShrink: 0 }}>
+            Sign In to Post
+          </button>
+        </div>
+      )}
 
       {/* Feed Stream */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

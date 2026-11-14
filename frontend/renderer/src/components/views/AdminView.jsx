@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const AdminView = () => {
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [stats, setStats] = useState({
     totalUsers: 142,
     totalStudents: 98,
@@ -57,6 +57,26 @@ export const AdminView = () => {
     { title: 'Feed Posts', value: stats.totalPosts, icon: MessageSquare, color: '#8A5A1A' },
     { title: 'Active Events', value: stats.totalEvents, icon: Calendar, color: '#B87C58' },
   ];
+
+  if (user?.role !== 'ADMIN') {
+    return (
+      <div style={{ maxWidth: '640px', margin: '60px auto 0', textAlign: 'center' }}>
+        <div className="card" style={{ padding: '36px 24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
+            Administrator Access Required
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+            Only verified institutional system administrators have permissions to view platform controls.
+          </p>
+          {!user && (
+            <button className="btn btn-primary" onClick={() => openAuthModal('login')}>
+              Sign In as Administrator
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -1,11 +1,38 @@
 {
-  "devDependencies": {
-    "electron": "^45.2.3"
-  },
-  "name": "frontend",
+  "name": "alumniconnect",
+  "productName": "AlumniConnect",
   "version": "1.0.0",
-  "description": "",
+  "description": "AlumniConnect - Engineering & Alumni Network",
   "main": "electron/main.cjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dev:web": "npm --prefix renderer run dev",
+    "build": "npm --prefix renderer run build",
+    "dist": "npm run build && electron-builder --mac dmg"
+  },
+  "build": {
+    "appId": "com.alumniconnect.app",
+    "productName": "AlumniConnect",
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.education",
+      "identity": null
+    },
+    "dmg": {
+      "title": "${productName} ${version}"
+    },
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "renderer/dist/**/*",
+      "package.json"
+    ]
+  },
   "dependencies": {
     "debug": "^4.4.3",
     "env-paths": "^3.0.0",
@@ -17,14 +44,12 @@
     "undici": "^7.30.2",
     "undici-types": "^7.24.6"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
-    "dev:web": "npm --prefix renderer run dev",
-    "build": "npm --prefix renderer run build"
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
   },
   "keywords": [],
-  "author": "",
+  "author": "AlumniConnect Team",
   "license": "ISC",
   "type": "commonjs"
 }
