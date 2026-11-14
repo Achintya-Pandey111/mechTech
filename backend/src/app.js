@@ -1,3 +1,4 @@
+// MechTech AlumniConnect API Server
 import express from "express";
 import cors from "cors";
 import corsOptions from "./configs/cors.js";
